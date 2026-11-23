@@ -1,0 +1,36 @@
+services:
+
+  # Основной ML-сервис
+  ml_service:
+    build:
+      context: ./ml_service
+    image: game_sales_service:2
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models:ro
+    restart: unless-stopped
+
+  # Генератор запросов
+  requests:
+    build:
+      context: ./requests
+    image: game_requests:1
+    environment:
+      API_URL: http://ml_service:8000/api/prediction
+    depends_on:
+      - ml_service
+    restart: unless-stopped
+
+  # Система мониторинга
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
