@@ -5,7 +5,7 @@ import os
 
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
-RUN_ID = "5b2b59db61df48ca97cce027ae37f66c"
+RUN_ID = "491984e6b2e846f2ab43f5e7ec1bc5b5"
 
 model_uri = f"runs:/{RUN_ID}/model"
 
