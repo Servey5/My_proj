@@ -10,3 +10,5 @@ optuna==3.6.1
 ipykernel==7.3.0
 SQLAlchemy==1.4.52
 pyarrow==17.0.0
+fastapi==0.165.0
+uvicorn==0.54.0
