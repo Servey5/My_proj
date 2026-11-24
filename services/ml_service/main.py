@@ -1,8 +1,11 @@
 import time
-from typing import Any, Dict
+from typing import Any, Dict #Импортируем типы для аннотаций.
 
-from fastapi import FastAPI, Request, Response
-from pydantic import BaseModel
+#Создание веб-приложения, 
+#Получение информации о входящем HTTP-запросе, 
+# Формирование HTTP-ответа
+from fastapi import FastAPI, Request, Response 
+from pydantic import BaseModel # Описание структуры JSON
 
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
@@ -67,6 +70,9 @@ HTTP_REQUESTS = Counter(
     "http_requests_total",
     "Total number of HTTP requests",
     ["method", "endpoint", "status"]
+    #HTTP-метод
+    #Адрес обработчика
+    #Код ответа
 )
 
 
@@ -87,17 +93,21 @@ HTTP_DURATION = Histogram(
 
 @app.middleware("http")
 async def collect_metrics(request: Request, call_next):
+    #async def — асинхронная функция;
+    #collect_metrics — название;
+    #request — входящий HTTP-запрос;
+    #call_next — функция передачи запроса следующему обработчику.
 
     start_time = time.perf_counter()
 
-    method = request.method
+    method = request.method  #Получаем HTTP-метод.
     endpoint = request.url.path
 
-    status_code = 500
+    status_code = 500 #код внутренней ошибки сервера
 
     try:
         response = await call_next(request)
-
+        #Передаём запрос следующему обработчику FastAPI с завершенеим асин операции
         status_code = response.status_code
 
         return response
@@ -122,7 +132,7 @@ async def collect_metrics(request: Request, call_next):
 # --------------------------------------------------
 # 7. Проверка работы API
 # --------------------------------------------------
-
+ #Регистрируем обработчик GET-запросов к корню приложения.
 @app.get("/")
 def root():
     return {"Hello": "World"}
@@ -139,7 +149,7 @@ class PredictionRequest(BaseModel):
 # --------------------------------------------------
 # 9. Endpoint предсказания
 # --------------------------------------------------
-
+# Регистрируем обработчик POST-запросов.
 @app.post("/api/prediction")
 def predict(item_id: int, body: PredictionRequest):
 
@@ -158,13 +168,16 @@ def predict(item_id: int, body: PredictionRequest):
 # --------------------------------------------------
 # 10. Endpoint для Prometheus
 # --------------------------------------------------
-
+#Регистрируем GET-обработчик /metrics.
 @app.get("/metrics", include_in_schema=False)
 def metrics():
 
-    return Response(
+    return Response(           #Возвращаем метрики Prometheus.
         content=generate_latest(),
         media_type=CONTENT_TYPE_LATEST
+        # generate_latest() собирает текущие значения зарегистрированных метрик.
+        #content= задаёт содержимое ответа.
+        #media_type= указывает формат данных.
     )
 
 
